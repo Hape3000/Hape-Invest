@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hape Invest">
+<title>Hape Invest Pro</title>
+<style>
+:root{
+  --bg:#020617;--panel:#0f172a;--card:#111827;--card2:#1f2937;--line:rgba(255,255,255,.09);
+  --text:#f8fafc;--muted:#9ca3af;--blue:#2563eb;--green:#22c55e;--yellow:#facc15;--orange:#fb923c;--red:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0f172a,#020617 65%);color:var(--text)}
+header{position:sticky;top:0;z-index:10;padding:22px 16px 12px;background:rgba(15,23,42,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:29px;letter-spacing:-.4px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+main{max-width:1100px;margin:auto;padding:12px 12px 90px}
+.card{background:rgba(17,24,39,.96);border:1px solid var(--line);border-radius:22px;padding:15px;margin:12px 0;box-shadow:0 14px 36px rgba(0,0,0,.28)}
+.tabs{display:flex;gap:8px;overflow:auto;margin:12px 0;padding-bottom:2px}
+.tab{border:0;border-radius:999px;padding:10px 14px;font-weight:800;background:#243044;color:#d1d5db;white-space:nowrap}
+.tab.active{background:var(--blue);color:white}
+.view{display:none}.view.active{display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.kpi{background:var(--card2);border-radius:17px;padding:12px;border:1px solid var(--line)}.kpi b{font-size:26px;display:block}.kpi span{color:var(--muted);font-size:12px}
+.row{display:grid;grid-template-columns:1.3fr .62fr .9fr .85fr .95fr;gap:8px;align-items:center}
+.head{color:var(--muted);font-size:12px;padding:0 4px 8px}
+.stock{font-weight:850}.ticker{color:var(--muted);font-size:12px;font-weight:600}
+input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.12);background:#020617;color:var(--text);border-radius:12px;padding:10px 8px;font-size:14px}
+.ampel{text-align:center;border-radius:999px;padding:9px 7px;font-weight:900;font-size:13px}
+.green{background:rgba(34,197,94,.16);color:#86efac;border:1px solid rgba(34,197,94,.38)}
+.yellow{background:rgba(250,204,21,.16);color:#fde68a;border:1px solid rgba(250,204,21,.38)}
+.orange{background:rgba(251,146,60,.16);color:#fed7aa;border:1px solid rgba(251,146,60,.38)}
+.red{background:rgba(239,68,68,.16);color:#fecaca;border:1px solid rgba(239,68,68,.38)}
+.small{color:var(--muted);font-size:12.5px;line-height:1.45}
+button{border:0;border-radius:14px;background:#2563eb;color:white;font-weight:800;padding:11px 13px;font-size:14px}
+button.secondary{background:#374151}
+.rule{padding:12px;border-radius:16px;margin:8px 0;background:#0b1220;border:1px solid var(--line)}
+.rule b{display:block;margin-bottom:4px}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#243044;color:#e5e7eb;font-size:12px;font-weight:800;margin-top:6px;margin-right:5px}
+.depotrow{display:grid;grid-template-columns:1fr .8fr .8fr .8fr .8fr;gap:8px;align-items:center;border-top:1px solid var(--line);padding:10px 4px}
+@media(max-width:780px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .row,.depotrow{grid-template-columns:1fr 1fr}
+  .head{display:none}.stock,.ampel{grid-column:span 2}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Hape Invest Pro</h1>
+  <div class="sub">Deine persönliche Qualitätsaktien-Ampel</div>
+</header>
+
+<main>
+<div class="tabs">
+  <button class="tab active" onclick="showView('dashboard',this)">Start</button>
+  <button class="tab" onclick="showView('watchlist',this)">Watchlist</button>
+  <button class="tab" onclick="showView('depot',this)">Depot</button>
+  <button class="tab" onclick="showView('rules',this)">Regeln</button>
+  <button class="tab" onclick="showView('notes',this)">Notizen</button>
+</div>
+
+<section id="dashboard" class="view active">
+  <div class="card">
+    <div class="kpis">
+      <div class="kpi"><b id="greenCount">0</b><span>🟢 Kauf prüfen</span></div>
+      <div class="kpi"><b id="yellowCount">0</b><span>🟡 Beobachten</span></div>
+      <div class="kpi"><b id="orangeCount">0</b><span>🟠 Teilverkauf</span></div>
+      <div class="kpi"><b id="redCount">0</b><span>🔴 Warten</span></div>
+    </div>
+    <div class="small" style="margin-top:10px">Einmal pro Woche TradingView öffnen, Tageschart 1D nutzen und RSI, SMA200-Lage sowie MACD eintragen.</div>
+  </div>
+  <div class="card">
+    <b>Heute interessant</b>
+    <div id="topIdeas" class="small" style="margin-top:8px">Noch keine Eingaben.</div>
+  </div>
+  <div class="card">
+    <b>Dein Fokus</b>
+    <div class="small" style="margin-top:8px">Zuerst Core-Aktien aufbauen: Microsoft, Visa, Mastercard, Alphabet, Amazon. Chancenaktien wie TKMS, Rheinmetall oder Alibaba nur als kleinere Beimischung.</div>
+  </div>
+</section>
+
+<section id="watchlist" class="view">
+  <div class="card">
+    <button onclick="saveAll()">Speichern</button>
+    <button class="secondary" onclick="resetSignals()">Signale zurücksetzen</button>
+    <div class="small" style="margin-top:8px">Alle Daten werden nur in deinem Browser gespeichert.</div>
+  </div>
+  <div class="card">
+    <div class="row head"><div>Aktie</div><div>RSI</div><div>Kurs vs. SMA200</div><div>MACD</div><div>Ampel</div></div>
+    <div id="watchlistRows"></div>
+  </div>
+</section>
+
+<section id="depot" class="view">
+  <div class="card">
+    <b>Depot-Eingabe</b>
+    <div class="small">Hier kannst du deine Positionen grob eintragen. Aktuelle Kurse kommen später in Version 2.</div>
+    <div class="depotrow head"><div>Position</div><div>Einstand €</div><div>Aktuell €</div><div>Anteil</div><div>Ergebnis</div></div>
+    <div id="depotRows"></div>
+  </div>
+</section>
+
+<section id="rules" class="view">
+  <div class="card">
+    <div class="rule green"><b>🟢 Kauf prüfen</b>Qualitätsunternehmen, RSI unter 40, Kurs nahe/unter SMA200, MACD neutral oder positiv. Einstieg gestaffelt.</div>
+    <div class="rule yellow"><b>🟡 Beobachten</b>Gutes Unternehmen, aber Signal ist noch nicht klar. Geduld behalten.</div>
+    <div class="rule orange"><b>🟠 Teilverkauf prüfen</b>RSI über 72, Kurs weit über SMA200 und MACD dreht nach unten. Eher 20–50 % verkaufen.</div>
+    <div class="rule red"><b>🔴 Warten</b>RSI hoch oder Aktie heiß gelaufen. Nicht hinterherlaufen.</div>
+  </div>
+</section>
+
+<section id="notes" class="view">
+  <div class="card">
+    <b>Meine Notizen</b>
+    <textarea id="notesBox" rows="8" placeholder="Hier kannst du eigene Gedanken eintragen..." oninput="saveNotes()"></textarea>
+  </div>
+</section>
+</main>
+
+<script>
+const stocks=[
+["Microsoft","MSFT","⭐⭐⭐⭐⭐","Core"],["Visa","V","⭐⭐⭐⭐⭐","Core"],["Mastercard","MA","⭐⭐⭐⭐⭐","Core"],["Alphabet","GOOGL","⭐⭐⭐⭐⭐","Core"],
+["Amazon","AMZN","⭐⭐⭐⭐","Wachstum"],["Nvidia","NVDA","⭐⭐⭐⭐","Wachstum"],["Apple","AAPL","⭐⭐⭐⭐","Core"],["McDonald's","MCD","⭐⭐⭐⭐","Defensiv"],
+["Costco","COST","⭐⭐⭐⭐⭐","Defensiv"],["Novo Nordisk","NVO","⭐⭐⭐⭐","Gesundheit"],["Eli Lilly","LLY","⭐⭐⭐⭐","Gesundheit"],["Coca-Cola","KO","⭐⭐⭐⭐","Defensiv"],
+["Procter & Gamble","PG","⭐⭐⭐⭐","Defensiv"],["ASML","ASML","⭐⭐⭐⭐","Halbleiter"],["Rheinmetall","RHM.DE","⭐⭐⭐⚠️","Chance"],["TKMS","TKMS","⭐⭐⭐⚠️","Chance"],["Alibaba","BABA","⭐⭐⭐⚠️","Chance"]
+];
+const depot=["Microsoft","Sanofi","Alibaba","Bitcoin","Ethereum","Gold/Silber"];
+let signals=JSON.parse(localStorage.getItem("hapeSignalsV1")||"{}");
+let depotData=JSON.parse(localStorage.getItem("hapeDepotV1")||"{}");
+
+function classify(rsi,sma,macd){
+ const n=parseFloat(String(rsi).replace(",","."));
+ if(!rsi||isNaN(n))return["🟡 Beobachten","yellow","RSI fehlt"];
+ if(n>=72&&sma==="weit drüber"&&macd==="dreht runter")return["🟠 Teilverkauf","orange","heiß gelaufen"];
+ if(n>=70)return["🔴 Warten","red","RSI hoch"];
+ if(n<=40&&(sma==="unter"||sma==="nahe")&&(macd==="positiv"||macd==="neutral"))return["🟢 Kauf prüfen","green","günstige Zone"];
+ if(n<=35&&sma==="unter")return["🟢 Kauf prüfen","green","stark überverkauft"];
+ if(n<=45)return["🟡 Beobachten","yellow","interessant"];
+ return["🟡 Warten","yellow","kein klares Kaufsignal"];
+}
+function setSignal(t,k,v){signals[t]=signals[t]||{};signals[t][k]=v;localStorage.setItem("hapeSignalsV1",JSON.stringify(signals));render();}
+function setDepot(p,k,v){depotData[p]=depotData[p]||{};depotData[p][k]=v;localStorage.setItem("hapeDepotV1",JSON.stringify(depotData));renderDepot();}
+function render(){
+ const el=document.getElementById("watchlistRows"); el.innerHTML="";
+ let counts={green:0,yellow:0,orange:0,red:0},ideas=[];
+ stocks.forEach(function(s){
+  const name=s[0],ticker=s[1],quality=s[2],category=s[3];
+  const d=signals[ticker]||{rsi:"",sma:"nahe",macd:"neutral"};
+  const c=classify(d.rsi,d.sma,d.macd); counts[c[1]]++; if(c[1]==="green")ideas.push(name+" ("+ticker+")");
+  const row=document.createElement("div"); row.className="row"; row.style.borderTop="1px solid rgba(255,255,255,.08)"; row.style.padding="10px 4px";
+  row.innerHTML='<div class="stock">'+name+'<div class="ticker">'+ticker+' · Qualität '+quality+'</div><span class="badge">'+category+'</span></div>'+
+  '<input inputmode="decimal" placeholder="RSI" value="'+(d.rsi||"")+'" onchange="setSignal(\''+ticker+'\',\'rsi\',this.value)">'+
+  '<select onchange="setSignal(\''+ticker+'\',\'sma\',this.value)">'+["unter","nahe","drüber","weit drüber"].map(x=>'<option '+(d.sma===x?"selected":"")+'>'+x+'</option>').join("")+'</select>'+
+  '<select onchange="setSignal(\''+ticker+'\',\'macd\',this.value)">'+["positiv","neutral","negativ","dreht runter"].map(x=>'<option '+(d.macd===x?"selected":"")+'>'+x+'</option>').join("")+'</select>'+
+  '<div class="ampel '+c[1]+'">'+c[0]+'<div class="ticker">'+c[2]+'</div></div>';
+  el.appendChild(row);
+ });
+ greenCount.textContent=counts.green; yellowCount.textContent=counts.yellow; orangeCount.textContent=counts.orange; redCount.textContent=counts.red;
+ topIdeas.textContent=ideas.length?ideas.join(" · "):"Noch keine grüne Aktie eingetragen.";
+}
+function renderDepot(){
+ const el=document.getElementById("depotRows"); el.innerHTML="";
+ depot.forEach(function(p){
+  const d=depotData[p]||{buy:"",now:"",share:""};
+  const buy=parseFloat(String(d.buy||"").replace(",",".")); const now=parseFloat(String(d.now||"").replace(",","."));
+  let res="–"; if(!isNaN(buy)&&!isNaN(now)&&buy>0){res=((now-buy)/buy*100).toFixed(1).replace(".",",")+" %";}
+  const row=document.createElement("div"); row.className="depotrow";
+  row.innerHTML='<div class="stock">'+p+'</div>'+
+  '<input inputmode="decimal" placeholder="Einstand" value="'+(d.buy||"")+'" onchange="setDepot(\''+p+'\',\'buy\',this.value)">'+
+  '<input inputmode="decimal" placeholder="Aktuell" value="'+(d.now||"")+'" onchange="setDepot(\''+p+'\',\'now\',this.value)">'+
+  '<input placeholder="z.B. 15%" value="'+(d.share||"")+'" onchange="setDepot(\''+p+'\',\'share\',this.value)">'+
+  '<div class="small">'+res+'</div>';
+  el.appendChild(row);
+ });
+}
+function saveAll(){localStorage.setItem("hapeSignalsV1",JSON.stringify(signals));localStorage.setItem("hapeDepotV1",JSON.stringify(depotData));alert("Gespeichert.");}
+function resetSignals(){if(confirm("Alle Signale löschen?")){signals={};localStorage.removeItem("hapeSignalsV1");render();}}
+function saveNotes(){localStorage.setItem("hapeNotesV1",notesBox.value);}
+function showView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));btn.classList.add("active");}
+document.getElementById("notesBox").value=localStorage.getItem("hapeNotesV1")||"";
+render(); renderDepot();
+</script>
+</body>
+</html>
