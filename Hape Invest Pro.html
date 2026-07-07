@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hape Invest</title>
+<style>
+:root{--card:#111827;--card2:#1f2937;--text:#f8fafc;--muted:#9ca3af;--blue:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0f172a,#020617);color:var(--text)}
+header{position:sticky;top:0;z-index:10;padding:22px 16px 12px;background:rgba(15,23,42,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+h1{margin:0;font-size:28px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+main{max-width:980px;margin:auto;padding:12px 12px 90px}.card{background:rgba(17,24,39,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:15px;margin:12px 0;box-shadow:0 12px 34px rgba(0,0,0,.28)}
+.tabs{display:flex;gap:8px;overflow:auto;margin:12px 0}.tab{border:0;border-radius:999px;padding:10px 14px;font-weight:800;background:#243044;color:#d1d5db}.tab.active{background:var(--blue);color:white}
+.view{display:none}.view.active{display:block}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{background:var(--card2);border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,.06)}.kpi b{font-size:24px;display:block}.kpi span{color:var(--muted);font-size:12px}
+.row{display:grid;grid-template-columns:1.2fr .65fr .9fr .85fr .95fr;gap:8px;align-items:center}.head{color:var(--muted);font-size:12px;padding:0 4px 8px}.stock{font-weight:850}.ticker{color:var(--muted);font-size:12px;font-weight:600}
+input,select{width:100%;border:1px solid rgba(255,255,255,.12);background:#020617;color:var(--text);border-radius:12px;padding:10px 8px;font-size:14px}.ampel{text-align:center;border-radius:999px;padding:9px 7px;font-weight:900;font-size:13px}
+.green{background:rgba(34,197,94,.16);color:#86efac;border:1px solid rgba(34,197,94,.38)}.yellow{background:rgba(250,204,21,.16);color:#fde68a;border:1px solid rgba(250,204,21,.38)}.orange{background:rgba(251,146,60,.16);color:#fed7aa;border:1px solid rgba(251,146,60,.38)}.red{background:rgba(239,68,68,.16);color:#fecaca;border:1px solid rgba(239,68,68,.38)}
+.small{color:var(--muted);font-size:12.5px;line-height:1.45}button{border:0;border-radius:14px;background:#2563eb;color:white;font-weight:800;padding:11px 13px;font-size:14px}button.secondary{background:#374151}.rule{padding:12px;border-radius:16px;margin:8px 0;background:#0b1220;border:1px solid rgba(255,255,255,.07)}.rule b{display:block;margin-bottom:4px}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#243044;color:#e5e7eb;font-size:12px;font-weight:800;margin-top:6px}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr 1fr}.head{display:none}.stock,.ampel{grid-column:span 2}}
+</style>
+</head>
+<body>
+<header><h1>Hape Invest</h1><div class="sub">Deine Qualitätsaktien-Ampel: RSI · SMA200 · MACD</div></header>
+<main>
+<div class="tabs">
+<button class="tab active" onclick="showView('dashboard',this)">Start</button>
+<button class="tab" onclick="showView('watchlist',this)">Watchlist</button>
+<button class="tab" onclick="showView('rules',this)">Regeln</button>
+<button class="tab" onclick="showView('help',this)">Hilfe</button>
+</div>
+<section id="dashboard" class="view active">
+<div class="card"><div class="kpis">
+<div class="kpi"><b id="greenCount">0</b><span>🟢 Kauf prüfen</span></div>
+<div class="kpi"><b id="yellowCount">0</b><span>🟡 Beobachten</span></div>
+<div class="kpi"><b id="orangeCount">0</b><span>🟠 Teilverkauf</span></div>
+<div class="kpi"><b id="redCount">0</b><span>🔴 Warten</span></div>
+</div><div class="small" style="margin-top:10px">Trage einmal pro Woche RSI, SMA200-Lage und MACD aus TradingView ein.</div></div>
+<div class="card"><b>Heute interessant</b><div id="topIdeas" class="small" style="margin-top:8px">Noch keine Eingaben.</div></div>
+</section>
+<section id="watchlist" class="view">
+<div class="card"><button onclick="saveData()">Speichern</button> <button class="secondary" onclick="resetData()">Zurücksetzen</button><div class="small" style="margin-top:8px">Die Eingaben bleiben nur auf deinem Gerät gespeichert.</div></div>
+<div class="card"><div class="row head"><div>Aktie</div><div>RSI</div><div>Kurs vs. SMA200</div><div>MACD</div><div>Ampel</div></div><div id="list"></div></div>
+</section>
+<section id="rules" class="view">
+<div class="card">
+<div class="rule green"><b>🟢 Kauf prüfen</b>Weltklassefirma, RSI unter 40, Kurs nahe/unter SMA200, MACD neutral oder positiv. Einstieg gestaffelt.</div>
+<div class="rule yellow"><b>🟡 Beobachten</b>Gutes Unternehmen, aber Signal ist noch nicht klar.</div>
+<div class="rule orange"><b>🟠 Teilverkauf prüfen</b>RSI über 72, Kurs weit über SMA200 und MACD dreht nach unten. Eher 20–50 % verkaufen.</div>
+<div class="rule red"><b>🔴 Warten</b>Aktie ist überhitzt oder die Signale passen nicht.</div>
+</div>
+</section>
+<section id="help" class="view">
+<div class="card"><b>So nutzt du Hape Invest</b><div class="small" style="margin-top:8px">1. TradingView öffnen.<br>2. Tageschart 1D einstellen.<br>3. RSI 14 und SMA 200 anschauen.<br>4. Werte hier eintragen.<br>5. Ampel lesen.</div></div>
+<div class="card"><b>iPhone</b><div class="small" style="margin-top:8px">Wenn die Datei bei GitHub Pages online ist: Link in Safari öffnen → Teilen → Zum Home-Bildschirm.</div></div>
+</section>
+</main>
+<script>
+const stocks=[
+["Microsoft","MSFT","⭐⭐⭐⭐⭐","Core"],["Visa","V","⭐⭐⭐⭐⭐","Core"],["Mastercard","MA","⭐⭐⭐⭐⭐","Core"],["Alphabet","GOOGL","⭐⭐⭐⭐⭐","Core"],
+["Amazon","AMZN","⭐⭐⭐⭐","Wachstum"],["Nvidia","NVDA","⭐⭐⭐⭐","Wachstum"],["Apple","AAPL","⭐⭐⭐⭐","Core"],["McDonald's","MCD","⭐⭐⭐⭐","Defensiv"],
+["Costco","COST","⭐⭐⭐⭐⭐","Defensiv"],["Novo Nordisk","NVO","⭐⭐⭐⭐","Gesundheit"],["Eli Lilly","LLY","⭐⭐⭐⭐","Gesundheit"],["Coca-Cola","KO","⭐⭐⭐⭐","Defensiv"],
+["Procter & Gamble","PG","⭐⭐⭐⭐","Defensiv"],["ASML","ASML","⭐⭐⭐⭐","Halbleiter"],["Rheinmetall","RHM.DE","⭐⭐⭐⚠️","Chance"],["TKMS","TKMS","⭐⭐⭐⚠️","Chance"],["Alibaba","BABA","⭐⭐⭐⚠️","Chance"]];
+let data=JSON.parse(localStorage.getItem("hapeInvestV2")||"{}");
+function classify(rsi,sma,macd){const n=parseFloat(String(rsi).replace(",","."));if(!rsi||isNaN(n))return["🟡 Beobachten","yellow","RSI fehlt"];if(n>=72&&sma==="weit drüber"&&macd==="dreht runter")return["🟠 Teilverkauf","orange","heiß gelaufen"];if(n>=70)return["🔴 Warten","red","RSI hoch"];if(n<=40&&(sma==="unter"||sma==="nahe")&&(macd==="positiv"||macd==="neutral"))return["🟢 Kauf prüfen","green","günstige Zone"];if(n<=35&&sma==="unter")return["🟢 Kauf prüfen","green","stark überverkauft"];if(n<=45)return["🟡 Beobachten","yellow","interessant"];return["🟡 Warten","yellow","kein klares Kaufsignal"];}
+function render(){const list=document.getElementById("list");list.innerHTML="";let counts={green:0,yellow:0,orange:0,red:0};let ideas=[];stocks.forEach(function(item){const name=item[0],ticker=item[1],quality=item[2],category=item[3];const d=data[ticker]||{rsi:"",sma:"nahe",macd:"neutral"};const c=classify(d.rsi,d.sma,d.macd);counts[c[1]]++;if(c[1]==="green")ideas.push(name+" ("+ticker+")");const row=document.createElement("div");row.className="row";row.style.borderTop="1px solid rgba(255,255,255,.08)";row.style.padding="10px 4px";row.innerHTML='<div class="stock">'+name+'<div class="ticker">'+ticker+' · Qualität '+quality+'</div><span class="badge">'+category+'</span></div><input inputmode="decimal" placeholder="RSI" value="'+(d.rsi||"")+'" onchange="setVal(\\''+ticker+'\\',\\'rsi\\',this.value)"><select onchange="setVal(\\''+ticker+'\\',\\'sma\\',this.value)">'+["unter","nahe","drüber","weit drüber"].map(v=>'<option '+(d.sma===v?"selected":"")+'>'+v+'</option>').join("")+'</select><select onchange="setVal(\\''+ticker+'\\',\\'macd\\',this.value)">'+["positiv","neutral","negativ","dreht runter"].map(v=>'<option '+(d.macd===v?"selected":"")+'>'+v+'</option>').join("")+'</select><div class="ampel '+c[1]+'">'+c[0]+'<div class="ticker">'+c[2]+'</div></div>';list.appendChild(row);});greenCount.textContent=counts.green;yellowCount.textContent=counts.yellow;orangeCount.textContent=counts.orange;redCount.textContent=counts.red;topIdeas.textContent=ideas.length?ideas.join(" · "):"Noch keine grüne Aktie eingetragen.";}
+function setVal(ticker,key,val){data[ticker]=data[ticker]||{};data[ticker][key]=val;localStorage.setItem("hapeInvestV2",JSON.stringify(data));render();}
+function saveData(){localStorage.setItem("hapeInvestV2",JSON.stringify(data));alert("Gespeichert.");}
+function resetData(){if(confirm("Alle Eingaben löschen?")){data={};localStorage.removeItem("hapeInvestV2");render();}}
+function showView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));btn.classList.add("active");}
+render();
+</script>
+</body>
+</html>
