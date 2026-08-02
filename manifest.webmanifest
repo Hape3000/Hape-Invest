@@ -1,10 +1,10 @@
 {
-  "name": "InvestPilot",
+  "name": "InvestPilot Pro",
   "short_name": "InvestPilot",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#07111f",
-  "theme_color": "#0b1728",
+  "theme_color": "#091625",
   "icons": [
     {
       "src": "icon.svg",
